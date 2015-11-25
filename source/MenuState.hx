@@ -15,7 +15,7 @@ import flixel.ui.FlxButton;
 
  	private var currentSelection = 0;
  	private	var loadText = new FlxText(200, 333, 41, ">_", 20);
- 	private var newText = new FlxText(380, 333, 21, "new", 20);
+ 	private var newText = new FlxText(380, 333, 21, "run", 20);
 	/**
 	 * Function that is called up when to state is created to set it up.
 	 */
