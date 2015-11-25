@@ -17,7 +17,7 @@ import flixel.math.FlxMath;
  {
  	var playerShip = new FlxSprite(0,0);
  	var accelFactor = 60;
- 	var dragFactor = 10;
+ 	var dragFactor = .1;
  	var ngAccelFactor = 5;
  	var ngDragFactor = 50;
  	var handlingFactor = .1;
@@ -116,8 +116,8 @@ import flixel.math.FlxMath;
 	 	} else if (down) {
 	 		playerShip.acceleration.x = 0;
 	 		playerShip.acceleration.y = 0;
-	 		playerShip.drag.x = dragFactor*stopLevel;
-	 		playerShip.drag.y = dragFactor*stopLevel;
+	 		playerShip.drag.x = Math.abs(playerShip.velocity.x)*dragFactor*stopLevel;
+	 		playerShip.drag.y = Math.abs(playerShip.velocity.y)*dragFactor*stopLevel;
 	 		playerShip.angularAcceleration = 0;
 	 		playerShip.angularDrag = ngDragFactor*2;
 	 		stopLevel += stopFactor;
@@ -126,15 +126,15 @@ import flixel.math.FlxMath;
 	 		playerShip.angularAcceleration += ngAccelFactor;
 	 		playerShip.acceleration.x = Math.cos((playerShip.angle * (Math.PI / 180))+rotationOffset)*handlingFactor*accelFactor;
 	 		playerShip.acceleration.y = Math.sin((playerShip.angle * (Math.PI / 180))+rotationOffset)*handlingFactor*accelFactor;
-	 		playerShip.drag.x = Math.cos(playerShip.angle * (Math.PI / 180)) * accelFactor * -1;
-	 		playerShip.drag.y = Math.sin(playerShip.angle * (Math.PI / 180)) * accelFactor * -1;
+	 		playerShip.drag.x = Math.abs(Math.cos(playerShip.angle * (Math.PI / 180)) * accelFactor);
+	 		playerShip.drag.y = Math.abs(Math.sin(playerShip.angle * (Math.PI / 180)) * accelFactor);
 	 	} else if (left) {
 	 		playerShip.angularDrag = 0;
 	 		playerShip.angularAcceleration -= ngAccelFactor;
 	 		playerShip.acceleration.x = Math.cos((playerShip.angle * (Math.PI / 180))-rotationOffset)*handlingFactor*accelFactor;
 	 		playerShip.acceleration.y = Math.sin((playerShip.angle * (Math.PI / 180))-rotationOffset)*handlingFactor*accelFactor;
-	 		playerShip.drag.x = Math.cos(playerShip.angle * (Math.PI / 180)) * accelFactor * -1;
-	 		playerShip.drag.y = Math.sin(playerShip.angle * (Math.PI / 180)) * accelFactor * -1;
+	 		playerShip.drag.x = Math.abs(Math.cos(playerShip.angle * (Math.PI / 180)) * accelFactor);
+	 		playerShip.drag.y = Math.abs(Math.sin(playerShip.angle * (Math.PI / 180)) * accelFactor);
 	 	} else {
 	 		playerShip.acceleration.x = 0;
 	 		playerShip.acceleration.y = 0;
@@ -163,8 +163,8 @@ import flixel.math.FlxMath;
 	 		stopLevel = 0;
 	 	} else if (FlxG.keys.justReleased.SPACE) {
 	 		allStop = true;
-	 		playerShip.drag.x = allStopDrag;
-	 		playerShip.drag.y = allStopDrag;
+	 		playerShip.drag.x = Math.abs(playerShip.velocity.x)*allStopDrag;
+	 		playerShip.drag.y = Math.abs(playerShip.velocity.y)*allStopDrag;
 	 	}
 	 }
 
