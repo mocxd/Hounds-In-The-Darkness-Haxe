@@ -13,7 +13,7 @@ import flixel.ui.FlxButton;
  class MenuState extends FlxState
  {
 
- 	private var currentSelection = 0;
+ 	private var currentSelection = 1;
  	private	var loadText = new FlxText(200, 333, 41, ">_", 20);
  	private var newText = new FlxText(380, 333, 21, "run", 20);
 	/**

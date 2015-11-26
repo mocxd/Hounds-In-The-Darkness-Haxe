@@ -17,16 +17,19 @@ import flixel.math.FlxMath;
  {
  	var playerShip = new FlxSprite(0,0);
  	var accelFactor = 60;
- 	var dragFactor = .1;
+ 	var dragFactor = 12;
  	var ngAccelFactor = 5;
  	var ngDragFactor = 50;
  	var handlingFactor = .1;
- 	var rotationOffset = .8;
+ 	var rotationOffset = .7;
  	var stopLevel = .0;
  	var stopFactor = .1;
- 	var allStopDrag = 40;
+ 	var sideDrag = 20;
+ 	var allStopDrag = 80;
  	var allStop = false;
  	var pin = .0;
+ 	var shipZ = .0;
+ 	var zFactor = .1;
 
  	var _x = new FlxText(0,20,1000,"debug",10);
  	var _y = new FlxText(0,40,1000,"debug",10);
@@ -102,10 +105,12 @@ import flixel.math.FlxMath;
 	 }
 
 	 private function playerMovement(e:Float):Void {
-	 	var up = FlxG.keys.anyPressed(["UP", "W"]);
-	 	var down = FlxG.keys.anyPressed(["DOWN", "S"]);
-	 	var left = FlxG.keys.anyPressed(["LEFT", "A"]);
-	 	var right = FlxG.keys.anyPressed(["RIGHT", "D"]);
+	 	var up = FlxG.keys.anyPressed(["UP"]);
+	 	var down = FlxG.keys.anyPressed(["DOWN"]);
+	 	var left = FlxG.keys.anyPressed(["LEFT"]);
+	 	var right = FlxG.keys.anyPressed(["RIGHT"]);
+	 	var zup = FlxG.keys.anyPressed(["Q", "W", "E", "R", "T", "Y"]);
+	 	var zdown = FlxG.keys.anyPressed(["Z", "X", "C", "V", "B", "N"]);
 
 	 	if (up) {
 	 		playerShip.drag.x = 0;
@@ -116,8 +121,10 @@ import flixel.math.FlxMath;
 	 	} else if (down) {
 	 		playerShip.acceleration.x = 0;
 	 		playerShip.acceleration.y = 0;
-	 		playerShip.drag.x = Math.abs(playerShip.velocity.x)*dragFactor*stopLevel;
-	 		playerShip.drag.y = Math.abs(playerShip.velocity.y)*dragFactor*stopLevel;
+	 		var nx = playerShip.velocity.x / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
+	 		var ny = playerShip.velocity.y / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
+	 		playerShip.drag.x = Math.abs(nx)*dragFactor*stopLevel;
+	 		playerShip.drag.y = Math.abs(ny)*dragFactor*stopLevel;
 	 		playerShip.angularAcceleration = 0;
 	 		playerShip.angularDrag = ngDragFactor*2;
 	 		stopLevel += stopFactor;
@@ -126,30 +133,48 @@ import flixel.math.FlxMath;
 	 		playerShip.angularAcceleration += ngAccelFactor;
 	 		playerShip.acceleration.x = Math.cos((playerShip.angle * (Math.PI / 180))+rotationOffset)*handlingFactor*accelFactor;
 	 		playerShip.acceleration.y = Math.sin((playerShip.angle * (Math.PI / 180))+rotationOffset)*handlingFactor*accelFactor;
-	 		playerShip.drag.x = Math.abs(Math.cos(playerShip.angle * (Math.PI / 180)) * accelFactor);
-	 		playerShip.drag.y = Math.abs(Math.sin(playerShip.angle * (Math.PI / 180)) * accelFactor);
+	 		// playerShip.drag.x = Math.abs(Math.cos(playerShip.angle * (Math.PI / 180)) * accelFactor);
+	 		// playerShip.drag.y = Math.abs(Math.sin(playerShip.angle * (Math.PI / 180)) * accelFactor);
+	 		var nx = playerShip.velocity.x / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
+	 		var ny = playerShip.velocity.y / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
+	 		playerShip.drag.x = Math.abs(nx)*sideDrag;
+	 		playerShip.drag.y = Math.abs(ny)*sideDrag;
 	 	} else if (left) {
 	 		playerShip.angularDrag = 0;
 	 		playerShip.angularAcceleration -= ngAccelFactor;
 	 		playerShip.acceleration.x = Math.cos((playerShip.angle * (Math.PI / 180))-rotationOffset)*handlingFactor*accelFactor;
 	 		playerShip.acceleration.y = Math.sin((playerShip.angle * (Math.PI / 180))-rotationOffset)*handlingFactor*accelFactor;
-	 		playerShip.drag.x = Math.abs(Math.cos(playerShip.angle * (Math.PI / 180)) * accelFactor);
-	 		playerShip.drag.y = Math.abs(Math.sin(playerShip.angle * (Math.PI / 180)) * accelFactor);
+	 		// playerShip.drag.x = Math.abs(Math.cos(playerShip.angle * (Math.PI / 180)) * accelFactor);
+	 		// playerShip.drag.y = Math.abs(Math.sin(playerShip.angle * (Math.PI / 180)) * accelFactor);
+	 		var nx = playerShip.velocity.x / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
+	 		var ny = playerShip.velocity.y / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
+	 		playerShip.drag.x = Math.abs(nx)*sideDrag;
+	 		playerShip.drag.y = Math.abs(ny)*sideDrag;
 	 	} else {
 	 		playerShip.acceleration.x = 0;
 	 		playerShip.acceleration.y = 0;
 	 		if (!allStop) {
 	 			playerShip.drag.x = 0;
 	 			playerShip.drag.y = 0;
+	 			playerShip.angularDrag = ngDragFactor;
 	 		}
 	 		playerShip.angularAcceleration = 0;
-	 		playerShip.angularDrag = ngDragFactor;
+
 	 	}
 
-	 	if (Math.abs(playerShip.velocity.x)+Math.abs(playerShip.velocity.y) == 0) {
+	 	if (zup) {
+	 		shipZ += zFactor;
+	 		updateZ();
+	 	} else if (zdown) {
+	 		shipZ -= zFactor;
+	 		updateZ();
+	 	}
+
+	 	if (Math.abs(playerShip.velocity.x)+Math.abs(playerShip.velocity.y) == 0 && playerShip.angularVelocity == 0) {
 	 		playerShip.drag.x = 0;
 	 		playerShip.drag.y = 0;
 	 		stopLevel = 0;
+	 		playerShip.angularDrag = ngDragFactor;
 	 		allStop = false;
 	 	} else {
 	 		pin += e;
@@ -163,9 +188,17 @@ import flixel.math.FlxMath;
 	 		stopLevel = 0;
 	 	} else if (FlxG.keys.justReleased.SPACE) {
 	 		allStop = true;
-	 		playerShip.drag.x = Math.abs(playerShip.velocity.x)*allStopDrag;
-	 		playerShip.drag.y = Math.abs(playerShip.velocity.y)*allStopDrag;
+	 		var nx = playerShip.velocity.x / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
+	 		var ny = playerShip.velocity.y / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
+	 		playerShip.drag.x = Math.abs(nx)*allStopDrag;
+	 		playerShip.drag.y = Math.abs(ny)*allStopDrag;
+	 		playerShip.angularDrag = allStopDrag*4;
 	 	}
+	 }
+
+	 private function updateZ():Void {
+	 	playerShip.scale.x = Math.pow(2, shipZ);
+	 	playerShip.scale.y = playerShip.scale.x;
 	 }
 
 	 private function dropPin():Void {
