@@ -2,6 +2,7 @@ package;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.group.FlxGroup;
 import flixel.FlxState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
@@ -29,7 +30,12 @@ import flixel.math.FlxMath;
  	var allStop = false;
  	var pin = .0;
  	var shipZ = .0;
- 	var zFactor = .1;
+ 	var zAccelFactor = .0001;
+ 	var zDragFactor = 1.1;
+ 	var zVelocity = .0;
+ 	var zStopThreshold = .0001;
+
+ 	var field:PlayField = new PlayField();
 
  	var _x = new FlxText(0,20,1000,"debug",10);
  	var _y = new FlxText(0,40,1000,"debug",10);
@@ -39,6 +45,8 @@ import flixel.math.FlxMath;
  	var _ngdrag = new FlxText(0,120,1000,"debug",10);
  	var _stoplevel = new FlxText(0,140,1000,"debug",10);
  	var _pin = new FlxText(0,160,1000,"debug",10);
+ 	var _zVelocity = new FlxText(0,180,1000,"debug",10);
+ 	var _shipZ = new FlxText(0,200,1000,"debug",10);
 	/**
 	 * Function that is called up when to state is created to set it up.
 	 */
@@ -49,6 +57,7 @@ import flixel.math.FlxMath;
 	 	starField(100);
 	 	pointField(10);
 	 	gridField(10);
+	 	objField(20);
 
 	 	_x.scrollFactor.set();
 	 	_y.scrollFactor.set();
@@ -58,6 +67,10 @@ import flixel.math.FlxMath;
 	 	_ngdrag.scrollFactor.set();
 	 	_stoplevel.scrollFactor.set();
 	 	_pin.scrollFactor.set();
+	 	_zVelocity.scrollFactor.set();
+	 	_shipZ.scrollFactor.set();
+
+	 	add(field);
 
 	 	add(new FlxText(0,0, "origin"));
 	 	add(playerShip);
@@ -70,6 +83,8 @@ import flixel.math.FlxMath;
 	 	add(_ngdrag);
 	 	add(_stoplevel);
 	 	add(_pin);
+	 	add(_zVelocity);
+	 	add(_shipZ);
 	 	FlxG.camera.follow(playerShip, FlxCameraFollowStyle.NO_DEAD_ZONE);
 	 	super.create();
 	 }
@@ -102,6 +117,8 @@ import flixel.math.FlxMath;
 	 	_ngdrag.text = "ngdrag: " + playerShip.angularDrag;
 	 	_stoplevel.text = "stoplevel: " + stopLevel;
 	 	_pin.text = "pin: " + pin;
+	 	_zVelocity.text = "zVelocity: " + zVelocity;
+	 	_shipZ.text = "shipZ: " + shipZ;
 	 }
 
 	 private function playerMovement(e:Float):Void {
@@ -110,6 +127,7 @@ import flixel.math.FlxMath;
 	 	var left = FlxG.keys.anyPressed(["LEFT"]);
 	 	var right = FlxG.keys.anyPressed(["RIGHT"]);
 	 	var zup = FlxG.keys.anyPressed(["Q", "W", "E", "R", "T", "Y"]);
+	 	var zstop = FlxG.keys.anyPressed(["A", "S", "D", "F", "G", "H"]);
 	 	var zdown = FlxG.keys.anyPressed(["Z", "X", "C", "V", "B", "N"]);
 
 	 	if (up) {
@@ -121,8 +139,15 @@ import flixel.math.FlxMath;
 	 	} else if (down) {
 	 		playerShip.acceleration.x = 0;
 	 		playerShip.acceleration.y = 0;
-	 		var nx = playerShip.velocity.x / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
-	 		var ny = playerShip.velocity.y / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
+	 		var nx = 0;
+	 		var ny = 0;
+	 		var vl = Math.sqrt(Math.pow(playerShip.velocity.x, 2) + Math.pow(playerShip.velocity.y, 2));
+	 		if (vl == 0) {
+	 			vl = 1;
+	 		}
+	 		// var vl = FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
+	 		var nx = playerShip.velocity.x / vl;
+	 		var ny = playerShip.velocity.y / vl;
 	 		playerShip.drag.x = Math.abs(nx)*dragFactor*stopLevel;
 	 		playerShip.drag.y = Math.abs(ny)*dragFactor*stopLevel;
 	 		playerShip.angularAcceleration = 0;
@@ -133,8 +158,6 @@ import flixel.math.FlxMath;
 	 		playerShip.angularAcceleration += ngAccelFactor;
 	 		playerShip.acceleration.x = Math.cos((playerShip.angle * (Math.PI / 180))+rotationOffset)*handlingFactor*accelFactor;
 	 		playerShip.acceleration.y = Math.sin((playerShip.angle * (Math.PI / 180))+rotationOffset)*handlingFactor*accelFactor;
-	 		// playerShip.drag.x = Math.abs(Math.cos(playerShip.angle * (Math.PI / 180)) * accelFactor);
-	 		// playerShip.drag.y = Math.abs(Math.sin(playerShip.angle * (Math.PI / 180)) * accelFactor);
 	 		var nx = playerShip.velocity.x / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
 	 		var ny = playerShip.velocity.y / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
 	 		playerShip.drag.x = Math.abs(nx)*sideDrag;
@@ -144,13 +167,12 @@ import flixel.math.FlxMath;
 	 		playerShip.angularAcceleration -= ngAccelFactor;
 	 		playerShip.acceleration.x = Math.cos((playerShip.angle * (Math.PI / 180))-rotationOffset)*handlingFactor*accelFactor;
 	 		playerShip.acceleration.y = Math.sin((playerShip.angle * (Math.PI / 180))-rotationOffset)*handlingFactor*accelFactor;
-	 		// playerShip.drag.x = Math.abs(Math.cos(playerShip.angle * (Math.PI / 180)) * accelFactor);
-	 		// playerShip.drag.y = Math.abs(Math.sin(playerShip.angle * (Math.PI / 180)) * accelFactor);
 	 		var nx = playerShip.velocity.x / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
 	 		var ny = playerShip.velocity.y / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
 	 		playerShip.drag.x = Math.abs(nx)*sideDrag;
 	 		playerShip.drag.y = Math.abs(ny)*sideDrag;
 	 	} else {
+	 		stopLevel = 0;
 	 		playerShip.acceleration.x = 0;
 	 		playerShip.acceleration.y = 0;
 	 		if (!allStop) {
@@ -163,11 +185,24 @@ import flixel.math.FlxMath;
 	 	}
 
 	 	if (zup) {
-	 		shipZ += zFactor;
-	 		updateZ();
+	 		accelerateZ(zAccelFactor, 0);
 	 	} else if (zdown) {
-	 		shipZ -= zFactor;
-	 		updateZ();
+	 		accelerateZ(-zAccelFactor, 0);
+	 	} else if (zstop) {
+	 		accelerateZ(0, zDragFactor);
+	 	} else {
+	 		accelerateZ(0);
+	 	}
+
+	 	if (FlxG.keys.justReleased.DOWN) {
+	 		stopLevel = 0;
+	 	} else if (FlxG.keys.justReleased.SPACE && Math.abs(playerShip.velocity.x)+Math.abs(playerShip.velocity.y) != 0) {
+	 		allStop = true;
+	 		var nx = playerShip.velocity.x / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
+	 		var ny = playerShip.velocity.y / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
+	 		playerShip.drag.x = Math.abs(nx)*allStopDrag;
+	 		playerShip.drag.y = Math.abs(ny)*allStopDrag;
+	 		playerShip.angularDrag = allStopDrag*4;
 	 	}
 
 	 	if (Math.abs(playerShip.velocity.x)+Math.abs(playerShip.velocity.y) == 0 && playerShip.angularVelocity == 0) {
@@ -184,21 +219,23 @@ import flixel.math.FlxMath;
 	 		}
 	 	}
 
-	 	if (FlxG.keys.justReleased.DOWN) {
-	 		stopLevel = 0;
-	 	} else if (FlxG.keys.justReleased.SPACE) {
-	 		allStop = true;
-	 		var nx = playerShip.velocity.x / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
-	 		var ny = playerShip.velocity.y / FlxMath.vectorLength(playerShip.velocity.x, playerShip.velocity.y);
-	 		playerShip.drag.x = Math.abs(nx)*allStopDrag;
-	 		playerShip.drag.y = Math.abs(ny)*allStopDrag;
-	 		playerShip.angularDrag = allStopDrag*4;
+	 	updateZ(e);
+	 }
+
+	 private function accelerateZ(accel:Float, ?drag:Float=0) {
+	 	if (drag != 0) {
+	 		zVelocity = (zVelocity + accel)/drag;
+	 		if (Math.abs(zVelocity) < zStopThreshold) {
+	 			zVelocity = 0;
+	 		}
+	 	} else {
+	 		zVelocity += accel;
 	 	}
 	 }
 
-	 private function updateZ():Void {
-	 	playerShip.scale.x = Math.pow(2, shipZ);
-	 	playerShip.scale.y = playerShip.scale.x;
+	 private function updateZ(e:Float):Void {
+	 	shipZ += zVelocity;
+	 	field.updateZ(playerShip.x, playerShip.y, shipZ);
 	 }
 
 	 private function dropPin():Void {
@@ -226,6 +263,22 @@ import flixel.math.FlxMath;
 	 	}
 	 }
 
+	 private function objField(n:Int):Void {
+	 	var i = 0;
+	 	var j = 0;
+	 	while (i < n) {
+	 		while (j < n) {
+	 			var o = new FlxSprite(32, 32);
+	 			o.x = 32*i;
+	 			o.y = 32*j;
+	 			o.loadGraphic("assets/images/pin2.png");
+	 			field.addSprite(o, 32*i, 32*j, .0);
+	 			j++;
+	 		}
+	 		j = 0;
+	 		i++;
+	 	}
+	 }
 	 private function gridField(n:Int):Void {
 	 	var i = 0;
 	 	var j = 0;

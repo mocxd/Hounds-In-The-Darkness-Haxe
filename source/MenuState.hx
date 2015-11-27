@@ -56,8 +56,6 @@ import flixel.ui.FlxButton;
 	 }
 
 	 private function menuActions():Void {
-	 	//var up = FlxG.keys.anyJustPressed(["UP", "W"]);
-	 	//var down = FlxG.keys.anyJustPressed(["DOWN", "S"]);
 	 	var left = FlxG.keys.anyJustPressed(["LEFT", "A"]);
 	 	var right = FlxG.keys.anyJustPressed(["RIGHT", "D"]);
 	 	var ok = FlxG.keys.anyJustPressed(["ENTER", "SPACE"]);
