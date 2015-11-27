@@ -20,9 +20,9 @@ import flixel.math.FlxMath;
  	var accelFactor = 60;
  	var dragFactor = 12;
  	var ngAccelFactor = 5;
- 	var ngDragFactor = 50;
- 	var handlingFactor = .1;
- 	var rotationOffset = .7;
+ 	var ngDragFactor = 100;
+ 	var handlingFactor = .2;
+ 	var rotationOffset = .9;
  	var stopLevel = .0;
  	var stopFactor = .1;
  	var sideDrag = 20;
@@ -70,6 +70,7 @@ import flixel.math.FlxMath;
 	 	_zVelocity.scrollFactor.set();
 	 	_shipZ.scrollFactor.set();
 
+	 	field.init();
 	 	add(field);
 
 	 	add(new FlxText(0,0, "origin"));
@@ -214,7 +215,7 @@ import flixel.math.FlxMath;
 	 	} else {
 	 		pin += e;
 	 		if (pin > .5) {
-	 			dropPin();
+	 			// dropPin();
 	 			pin = 0;
 	 		}
 	 	}
@@ -239,9 +240,13 @@ import flixel.math.FlxMath;
 	 }
 
 	 private function dropPin():Void {
-	 	var pin = new FlxSprite(playerShip.x+8,playerShip.y+8);
+	 	var pin = new FlxSprite(playerShip.x,playerShip.y);
 	 	pin.loadGraphic("assets/images/pin.png");
-	 	add(pin);
+	 	var blip = new FlxSprite(playerShip.x,playerShip.y);
+	 	blip.loadGraphic("assets/images/blip.png");
+	 	// add(pin);
+	 	field.addSprite(pin, playerShip.x, playerShip.y, shipZ);
+	 	field.addSprite(blip, playerShip.x, playerShip.y, shipZ, false);
 	 }
 
 	 private function starField(n:Int):Void {
@@ -268,16 +273,20 @@ import flixel.math.FlxMath;
 	 	var j = 0;
 	 	while (i < n) {
 	 		while (j < n) {
-	 			var o = new FlxSprite(32, 32);
-	 			o.x = 32*i;
-	 			o.y = 32*j;
+	 			var o = new FlxSprite(32*i, 32*j);
 	 			o.loadGraphic("assets/images/pin2.png");
+	 			// var blip = new FlxSprite(playerShip.x,playerShip.y);
+	 			// blip.loadGraphic("assets/images/blip.png");
 	 			field.addSprite(o, 32*i, 32*j, .0);
+	 			// field.addSprite(blip, 32*i, 32*j, .0, false);
 	 			j++;
 	 		}
 	 		j = 0;
 	 		i++;
 	 	}
+	 	var ob = new FlxSprite(50, 44);
+	 	ob.loadGraphic("assets/images/pin.png");
+	 	field.addSprite(ob, 50, 44, .0, true);
 	 }
 	 private function gridField(n:Int):Void {
 	 	var i = 0;
