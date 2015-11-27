@@ -23,7 +23,7 @@ import flixel.text.FlxText;
         add(fieldMarkText);
     }
 
-    public function addSprite(obj:FlxSprite, x:Float, y:Float, z:Float, ?mark:Bool=true) {
+    public function addSprite(obj:FlxSprite, x:Float, y:Float, z:Float, ?mark:Bool=false) {
         add(obj);
         fieldObjects.push(obj);
         fieldXYZ.push(new Point3D(x,y,z));
@@ -50,12 +50,14 @@ import flixel.text.FlxText;
                 fieldObjects[i].scale.x = 0;
                 fieldObjects[i].scale.y = 0;
             }
-            if (fieldMark[i] && (posZ-fieldXYZ[i].z) > -1) {
-                fieldMarkText.x = fieldXYZ[i].x+(posZ-fieldXYZ[i].z)*nx;
-                fieldMarkText.y = fieldXYZ[i].y+(posZ-fieldXYZ[i].z)*ny;
-            } else {
-                fieldMarkText.x = posX;
-                fieldMarkText.y = posY;
+            if (fieldMark[i]) {
+                if ((posZ-fieldXYZ[i].z) > -1) {
+                    fieldMarkText.x = fieldXYZ[i].x+(posZ-fieldXYZ[i].z)*nx;
+                    fieldMarkText.y = fieldXYZ[i].y+(posZ-fieldXYZ[i].z)*ny;
+                } else {
+                    fieldMarkText.x = posX;
+                    fieldMarkText.y = posY;
+                }
             }
         }
     }

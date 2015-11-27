@@ -215,7 +215,7 @@ import flixel.math.FlxMath;
 	 	} else {
 	 		pin += e;
 	 		if (pin > .5) {
-	 			// dropPin();
+	 			dropPin();
 	 			pin = 0;
 	 		}
 	 	}
@@ -240,13 +240,10 @@ import flixel.math.FlxMath;
 	 }
 
 	 private function dropPin():Void {
-	 	var pin = new FlxSprite(playerShip.x,playerShip.y);
-	 	pin.loadGraphic("assets/images/pin.png");
-	 	var blip = new FlxSprite(playerShip.x,playerShip.y);
-	 	blip.loadGraphic("assets/images/blip.png");
+	 	var _pin = new FlxSprite(playerShip.x,playerShip.y);
+	 	_pin.loadGraphic("assets/images/pin.png");
 	 	// add(pin);
-	 	field.addSprite(pin, playerShip.x, playerShip.y, shipZ);
-	 	field.addSprite(blip, playerShip.x, playerShip.y, shipZ, false);
+	 	field.addSprite(_pin, playerShip.x, playerShip.y, shipZ);
 	 }
 
 	 private function starField(n:Int):Void {
